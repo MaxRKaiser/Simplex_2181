@@ -44,6 +44,7 @@ void AppClass::Init(void)
 	InitOpenGL();	//Initialize Rendering Context
 	InitShaders();	//Compile Shaders
 	InitVariables();//Init shape
+
 }
 void AppClass::InitWindow()
 {
@@ -115,6 +116,17 @@ void AppClass::ProcessKeyboard(sf::Event a_event)
 		m_v3Color = glm::vec3(0.0f, 0.0f, 1.0f);
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num0))
 		m_v3Color = glm::vec3(-1.0f, -1.0f, -1.0f);
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
+		if (isCompliment)
+		{
+			isCompliment = false;
+			m_v3Color = glm::vec3(-1.0f, -1.0f, -1.0f);
+		}
+		else if (!isCompliment)
+		{
+			isCompliment = true;
+			m_v3Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
 }
 void AppClass::Display(void)
 {
