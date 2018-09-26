@@ -12,10 +12,37 @@ void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	if (a_nSubdivisions > 360)
 		a_nSubdivisions = 360;
 
-	/*
-		Calculate a_nSubdivisions number of points around a center point in a radial manner
-		then call the AddTri function to generate a_nSubdivision number of faces
-	*/
+	float rad = a_fRadius;
+	int subDiv = a_nSubdivisions;
+	std::vector<vector3> coneVec; //for storing points in circle base
+	float angleStep = (2 * PI) / subDiv; //internal angle of circle base
+	float x = 0;
+	float y = 0;
+
+
+	vector3 point02(0, 0, 0); //circle center
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep)
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * rad), y + (cosine * rad), 0); //point to be stored
+		coneVec.push_back(tempVec);
+	}
+
+	for (int i = 0; i < coneVec.size(); i++) //loop through points vector and create tris
+	{
+		if (i + 1 != coneVec.size())
+		{
+			AddTri(point02, coneVec[i + 1], coneVec[i]);
+		}
+
+		else
+		{
+			AddTri(point02, coneVec[0], coneVec[i]);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
