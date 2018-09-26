@@ -276,7 +276,41 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	float height = a_fHeight;
+	float rad = a_fRadius;
+	int subDiv = a_nSubdivisions;
+	std::vector<vector3> coneVec; //for storing points in circle base
+	float angleStep = (2*PI) / subDiv; //internal angle of circle base
+	float x = 0;
+	float z = 0;
+
+	vector3 point01(0, height * .5, 0); //top of cone
+	vector3 point02(0, -height * .5, 0); //bottom of cone
+
+	for (float angle = 0.0f; angle < 2*PI; angle += angleStep)
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * rad), -height * .5, z + (cosine * rad)); //point to be stored
+		coneVec.push_back(tempVec);
+	}
+	
+	for (int i = 0; i < coneVec.size(); i++) //loop through points vector and create tris
+	{
+		if (i + 1 != coneVec.size()) 
+		{
+			AddTri(point02, coneVec[i + 1], coneVec[i]);
+			AddTri(point01, coneVec[i], coneVec[i + 1]);
+		}
+		
+		else
+		{
+			AddTri(point02, coneVec[0], coneVec[i]);
+			AddTri(point01, coneVec[i], coneVec[0]);
+		}
+	}
+
 	// -------------------------------
 
 	// Adding information about color
@@ -300,7 +334,52 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	float height = a_fHeight;
+	float rad = a_fRadius;
+	int subDiv = a_nSubdivisions;
+	std::vector<vector3> cylVec1; //For storing top cylinder circle
+	std::vector<vector3> cylVec2; //For storing bottom cylinder circle
+	float angleStep = (2 * PI) / subDiv;
+	float x = 0;
+	float z = 0;
+
+	vector3 point01(0, height * .5, 0); //top of cylinder
+	vector3 point02(0, -height * .5, 0); //bottom of cylinder
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //Top circle points
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * rad), height * .5, z + (cosine * rad)); //point to be stored
+		cylVec1.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //Bottom circle points
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * rad), -height * .5, z + (cosine * rad)); //point to be stored
+		cylVec2.push_back(tempVec);
+	}
+
+	for (int i = 0; i < cylVec1.size(); i++) 
+	{
+		if (i + 1 != cylVec1.size())
+		{
+			AddTri(point01, cylVec1[i], cylVec1[i + 1]); //top
+			AddTri(point02, cylVec2[i + 1], cylVec2[i]); //bottom
+			AddQuad(cylVec2[i], cylVec2[i + 1], cylVec1[i], cylVec1[i + 1]); //sides
+		}
+
+		else
+		{
+			AddTri(point01, cylVec1[i], cylVec1[0]); //top
+			AddTri(point02, cylVec2[0], cylVec2[i]); //bottom
+			AddQuad(cylVec2[i], cylVec2[0], cylVec1[i], cylVec1[0]); //sides
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -330,7 +409,75 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	float height = a_fHeight;
+	float outRad = a_fOuterRadius;
+	float inRad = a_fInnerRadius;
+	int subDiv = a_nSubdivisions;
+	std::vector<vector3> tubVec11; //inner rad top
+	std::vector<vector3> tubVec12; //outer rad top
+	std::vector<vector3> tubVec21; //inner rad bottom
+	std::vector<vector3> tubVec22; //outer rad bottom
+	float angleStep = (2 * PI) / subDiv;
+	float x = 0;
+	float z = 0;
+
+	//vector3 point01(0, height * .5, 0); //top of cylinder
+	//vector3 point02(0, -height * .5, 0); //bottom of cylinder
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //inner circle top
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * inRad), height * .5, z + (cosine * inRad)); //point to be stored
+		tubVec11.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //outer circle top
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * outRad), height * .5, z + (cosine * outRad)); //point to be stored
+		tubVec12.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //inner circle bottom
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * inRad), -height * .5, z + (cosine * inRad)); //point to be stored
+		tubVec21.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //outer circle bottom
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * outRad), -height * .5, z + (cosine * outRad)); //point to be stored
+		tubVec22.push_back(tempVec);
+	}
+
+	for (int i = 0; i < tubVec11.size(); i++)
+	{
+		if (i + 1 != tubVec11.size())
+		{
+			AddQuad(tubVec22[i], tubVec22[i + 1], tubVec12[i], tubVec12[i + 1]); //outer wall
+			AddQuad(tubVec11[i], tubVec11[i + 1], tubVec21[i], tubVec21[i + 1]); //inner wall
+			AddQuad(tubVec12[i], tubVec12[i + 1], tubVec11[i], tubVec11[i + 1]); //top cap
+			AddQuad(tubVec21[i], tubVec21[i + 1], tubVec22[i], tubVec22[i + 1]); //bottom cap
+		}
+
+		else
+		{
+			AddQuad(tubVec22[i], tubVec22[0], tubVec12[i], tubVec12[0]); //outer wall
+			AddQuad(tubVec11[i], tubVec11[0], tubVec21[i], tubVec21[0]); //inner wall
+			AddQuad(tubVec12[i], tubVec12[0], tubVec11[i], tubVec11[0]); //top cap
+			AddQuad(tubVec21[i], tubVec21[0], tubVec22[i], tubVec22[0]); //bottom cap
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -362,7 +509,73 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	float outRad = a_fOuterRadius;
+	float inRad = a_fInnerRadius;
+	float midRad = (outRad + inRad) / 2;
+	int subDiv = a_nSubdivisionsA;
+	std::vector<vector3> tubVec11; //circle top
+	std::vector<vector3> tubVec12; //inner circle side
+	std::vector<vector3> tubVec21; //circle bottom
+	std::vector<vector3> tubVec22; //outer circle side
+	float angleStep = (2 * PI) / subDiv;
+	float x = 0;
+	float z = 0;
+
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) // circle top
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * midRad), .2, z + (cosine * midRad)); //point to be stored
+		tubVec11.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //inner circle side
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * inRad), 0, z + (cosine * inRad)); //point to be stored
+		tubVec12.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) // circle bottom
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * midRad), -.2, z + (cosine * midRad)); //point to be stored
+		tubVec21.push_back(tempVec);
+	}
+
+	for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //outer circle side
+	{
+		float sine = sin(angle);
+		float cosine = cos(angle);
+
+		vector3 tempVec(x + (sine * outRad), 0, z + (cosine * outRad)); //point to be stored
+		tubVec22.push_back(tempVec);
+	}
+
+	for (int i = 0; i < tubVec11.size(); i++)
+	{
+		if (i + 1 != tubVec11.size())
+		{
+			AddQuad(tubVec22[i], tubVec22[i + 1], tubVec11[i], tubVec11[i + 1]); 
+			AddQuad(tubVec11[i], tubVec11[i + 1], tubVec12[i], tubVec12[i + 1]); 
+			AddQuad(tubVec12[i], tubVec12[i + 1], tubVec21[i], tubVec21[i + 1]); 
+			AddQuad(tubVec21[i], tubVec21[i + 1], tubVec22[i], tubVec22[i + 1]); 
+		}
+
+		else
+		{
+			AddQuad(tubVec22[i], tubVec22[0], tubVec11[i], tubVec11[0]); 
+			AddQuad(tubVec11[i], tubVec11[0], tubVec12[i], tubVec12[0]); 
+			AddQuad(tubVec12[i], tubVec12[0], tubVec21[i], tubVec21[0]); 
+			AddQuad(tubVec21[i], tubVec21[0], tubVec22[i], tubVec22[0]); 
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -387,7 +600,95 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	float rad = a_fRadius;
+	int subDiv = a_nSubdivisions;
+	float tempRad;
+	float angleStep = (2 * PI) / subDiv;
+	float x = 0;
+	float z = 0;
+	std::vector<std::vector<vector3>> vecVector; //vector to store vectors storing points (kill me)
+
+	for (int i = 0; i < subDiv; i++)
+	{
+		std::vector<vector3> newVec; //For storing circle points
+		vecVector.push_back(newVec);
+	}
+
+	vector3 point01(0, rad * .75, 0); //top of sphere
+	vector3 point02(0, -rad * .75, 0); //bottom of sphere
+
+	for (int i = 0; i < vecVector.size(); i++)
+	{
+
+		if (subDiv == 3) //hardcoded, if small shape, adjust radius
+		{
+			if (i == 0 || i == 2)
+				tempRad = rad * .5;
+			if (i == 1)
+				tempRad = rad * .8;
+		}
+		else if (subDiv == 5) //hardcoded, if large shape, adjust radius
+		{
+			if (i == 0 || i == 4)
+				tempRad = rad * .333333;
+			if (i == 1 || i == 3)
+				tempRad = rad * .6666666;
+			if (i == 2)
+				tempRad = rad * .8;
+		}
+		else //if shape is changed, default to prism
+		{
+			tempRad = rad * .8;
+		}
+
+		for (float angle = 0.0f; angle < 2 * PI; angle += angleStep) //create indavidual 2d circles
+		{
+			float sine = sin(angle);
+			float cosine = cos(angle);
+
+			vector3 tempVec(x + (sine * tempRad), rad - (((rad * 2) / (subDiv + 1)) * (i + 1)), z + (cosine * tempRad)); //point to be stored
+			vecVector[i].push_back(tempVec);
+		}
+	}
+
+	for (int q = 0; q < vecVector.size(); q++) //loop through vector containing vectors
+	{
+		for (int i = 0; i < vecVector[q].size(); i++) //loop through vector containing points
+		{
+			if (i + 1 != vecVector[q].size()) //if is not last subdivision
+			{
+				if (q == 0) //if first subdivision
+				{
+					AddTri(vecVector[0][i], vecVector[0][i + 1], point01);
+					AddQuad(vecVector[q + 1][i], vecVector[q + 1][i + 1], vecVector[q][i], vecVector[q][i + 1]);
+				}
+				else if (q + 1 != vecVector.size())
+				{
+					AddQuad(vecVector[q + 1][i], vecVector[q + 1][i + 1], vecVector[q][i], vecVector[q][i + 1]);
+				}
+				else if (q == vecVector.size() - 1)
+				{
+					AddTri(vecVector[q][i + 1], vecVector[q][i], point02);
+				}
+			}
+			else
+			{
+				if (q == 0)
+				{
+					AddTri(vecVector[0][i], vecVector[0][0], point01);
+					AddQuad(vecVector[q + 1][i], vecVector[q + 1][0], vecVector[q][i], vecVector[q][0]);
+				}
+				else if (q + 1 != vecVector.size())
+				{
+					AddQuad(vecVector[q + 1][i], vecVector[q + 1][0], vecVector[q][i], vecVector[q][0]);
+				}
+				else if (q == vecVector.size() - 1)
+				{
+					AddTri(vecVector[q][0], vecVector[q][i], point02);
+				}
+			}
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
