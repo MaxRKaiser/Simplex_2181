@@ -15,7 +15,10 @@ Date: 2017/05
 class Application
 {
 	MyMesh* m_pMesh = nullptr;
-	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	String m_sProgrammer = "Max Kaiser - mrk5790@rit.edu";
+
+	std::vector<MyMesh*> meshList;
+	int count;
 
 private:
 	static ImGuiObject gui; //GUI object
