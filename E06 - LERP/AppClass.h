@@ -12,9 +12,11 @@ Date: 2017/05
 
 class Application
 {
-	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	String m_sProgrammer = "Max Kaiser - mrk5790@rit.edu";
 	std::vector<vector3> m_stopsList;
 	Simplex::Model* m_pModel = nullptr;
+	int curStop = 0;
+	float curTime = 0;
 private:
 	static ImGuiObject gui; //GUI object
 	

@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Max Kaiser - mrk5790@rit.edu";
 
 	//Set the position and target of the camera
 	m_pCameraMngr->SetPositionTargetAndUpward(vector3(5.0f,3.0f,15.0f), ZERO_V3, AXIS_Y);
@@ -10,22 +10,23 @@ void Application::InitVariables(void)
 	m_pModel = new Simplex::Model();
 	m_pModel->Load("Sorted\\WallEye.bto");
 	
-	m_stopsList.push_back(vector3(-4.0f, -2.0f, 5.0f));
-	m_stopsList.push_back(vector3(1.0f, -2.0f, 5.0f));
+	m_stopsList.push_back(vector3(-4.0f, -2.0f, 0.0f));
+	m_stopsList.push_back(vector3(-4.0f, 2.0f, 0.0f));
 
-	m_stopsList.push_back(vector3(-3.0f, -1.0f, 3.0f));
-	m_stopsList.push_back(vector3(2.0f, -1.0f, 3.0f));
+	m_stopsList.push_back(vector3(-4.0f, 0.0f, 0.0f));
+	m_stopsList.push_back(vector3(0.0f, 0.0f, 0.0f));
 
-	m_stopsList.push_back(vector3(-2.0f, 0.0f, 0.0f));
-	m_stopsList.push_back(vector3(3.0f, 0.0f, 0.0f));
+	m_stopsList.push_back(vector3(0.0f, 2.0f, 0.0f));
+	m_stopsList.push_back(vector3(0.0f, -2.0f, 0.0f));
 
-	m_stopsList.push_back(vector3(-1.0f, 1.0f, -3.0f));
-	m_stopsList.push_back(vector3(4.0f, 1.0f, -3.0f));
+	m_stopsList.push_back(vector3(4.0f, -2.0f, 0.0f));
+	m_stopsList.push_back(vector3(8.0f, -2.0f, 0.0f));
 
-	m_stopsList.push_back(vector3(0.0f, 2.0f, -5.0f));
-	m_stopsList.push_back(vector3(5.0f, 2.0f, -5.0f));
+	m_stopsList.push_back(vector3(6.0f, -2.0f, 0.0f));
+	m_stopsList.push_back(vector3(6.0f, 2.0f, 0.0f));
 
-	m_stopsList.push_back(vector3(1.0f, 3.0f, -5.0f));
+	m_stopsList.push_back(vector3(4.0f, 2.0f, 0.0f));
+	m_stopsList.push_back(vector3(8.0f, 2.0f, 0.0f));
 }
 void Application::Update(void)
 {
@@ -59,7 +60,29 @@ void Application::Display(void)
 
 
 	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
+	static float percent = 0.0f;
+
+	if (fTimer - curTime > .001)
+	{
+		curTime = fTimer;
+		percent += .01;
+
+		if (percent >= 1)
+		{
+			percent = 0;
+			if (curStop + 1 >= m_stopsList.size() - 1)
+			{
+				curStop = 0;
+			}
+			else
+			{
+				curStop = curStop + 1;
+			}
+		}
+	}
+
+	v3CurrentPos = glm::lerp(m_stopsList[curStop], m_stopsList[curStop + 1], percent);
+
 	//-------------------
 	
 
