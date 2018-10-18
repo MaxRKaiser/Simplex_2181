@@ -284,7 +284,7 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	float x = 0;
 	float z = 0;
 
-	vector3 point01(0, height * .5, 0); //top of cone
+	vector3 point01(0, 0, 0); //top of cone
 	vector3 point02(0, -height * .5, 0); //bottom of cone
 
 	for (float angle = 0.0f; angle < 2*PI; angle += angleStep)
