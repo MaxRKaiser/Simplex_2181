@@ -23,6 +23,7 @@ class Application
 	String m_sProgramer = "DEFAULT"; //Name of programmer
 	vector3 v3CurrentPos = vector3(0.0f,0.0f,0.0f);
 	std::vector<vector3> myPoints;
+	quaternion qOrient;
 
 
 private:

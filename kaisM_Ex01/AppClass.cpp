@@ -1,4 +1,7 @@
 #include "AppClass.h"
+#include <windows.h>
+#include <mmsystem.h>
+#include <iostream>
 using namespace Simplex;
 void Application::InitVariables(void)
 {
@@ -16,10 +19,15 @@ void Application::InitVariables(void)
 	m_pMesh = new MyMesh();
 	m_pMesh->GenerateCone(1.0f, 2.0f, 8, vector3(0.0f, 0.0f, 0.0f));
 
+	myPoints = m_pGuideCube->GetVertexList();
+
 #pragma endregion
 
 	//Please change to your name and email
 	m_sProgramer = "Max Kaiser - mrk5790@rit.edu";
+
+
+	//PlaySound(TEXT("C:/Users/Max Kaiser/Source/Repos/Simplex_2181/kaisM_Ex01/mySound.wav"), NULL, SND_FILENAME | SND_ASYNC);
 }
 void Application::Update(void)
 {
@@ -36,8 +44,6 @@ void Application::Update(void)
 }
 void Application::Display(void)
 {
-
-	
 	static int curStop = 0;
 	static float fPercentage = 0;
 	// Clear the screen
@@ -65,7 +71,7 @@ void Application::Display(void)
 	}
 
 	//Add points
-	myPoints = m_pGuideCube->GetVertexList();
+	//myPoints = m_pGuideCube->GetVertexList();
 	
 	//calculate the current position
 	if (curStop + 1 >= myPoints.size())
@@ -82,8 +88,45 @@ void Application::Display(void)
 	}
 
 	matrix4 m4Model = glm::translate(IDENTITY_M4, v3CurrentPos);
+
+	//Change orientation
 	
-	m_pMesh->Render(m4Projection, m4View, m4Model * ToMatrix4(m_qArcBall));
+	if (curStop >= 0 && curStop < 6) //front
+	{
+		qOrient = glm::angleAxis(glm::radians(-90.0f), vector3(1.0f, 0.0f, 0.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
+	else if (curStop >= 6 && curStop < 12) //right
+	{
+		qOrient = glm::angleAxis(glm::radians(90.0f), vector3(0.0f, 0.0f, 1.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
+	else if (curStop >= 12 && curStop < 18) //top
+	{
+		qOrient = glm::angleAxis(glm::radians(180.0f), vector3(1.0f, 0.0f, 0.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
+	else if (curStop >= 18 && curStop < 24) //back
+	{
+		qOrient = glm::angleAxis(glm::radians(90.0f), vector3(1.0f, 0.0f, 0.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
+	else if (curStop >= 24 && curStop < 30) //left
+	{
+		qOrient = glm::angleAxis(glm::radians(-90.0f), vector3(0.0f, 0.0f, 1.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
+	else if (curStop >= 30 && curStop < 36) //bottom
+	{
+		qOrient = glm::angleAxis(glm::radians(0.0f), vector3(1.0f, 0.0f, 0.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
+	
+	m4Model *= glm::toMat4(qOrient);
+	m4Model *= ToMatrix4(m_qArcBall);
+
+
+	m_pMesh->Render(m4Projection, m4View, m4Model);
 #pragma region DOES NOT NEED CHANGES
 	/*
 		This part does not need any changes at all, it is just for rendering the guide cube, the 
