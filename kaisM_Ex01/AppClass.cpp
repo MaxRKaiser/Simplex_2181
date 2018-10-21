@@ -1,6 +1,5 @@
 #include "AppClass.h"
-#include <windows.h>
-#include <mmsystem.h>
+#include <SFML/Audio.hpp>
 #include <iostream>
 using namespace Simplex;
 void Application::InitVariables(void)
@@ -26,8 +25,12 @@ void Application::InitVariables(void)
 	//Please change to your name and email
 	m_sProgramer = "Max Kaiser - mrk5790@rit.edu";
 
-
-	//PlaySound(TEXT("C:/Users/Max Kaiser/Source/Repos/Simplex_2181/kaisM_Ex01/mySound.wav"), NULL, SND_FILENAME | SND_ASYNC);
+	if (!m_soundBGM.openFromFile("..\\_Binary\\Data\\Audio\\mySound.wav"))
+	{
+		std::cout << "error" << std::endl; // error
+	}
+	m_soundBGM.play();
+	std::cout << m_soundBGM.getVolume();
 }
 void Application::Update(void)
 {
@@ -96,12 +99,12 @@ void Application::Display(void)
 		qOrient = glm::angleAxis(glm::radians(-90.0f), vector3(1.0f, 0.0f, 0.0f));
 		//m4Model *= glm::toMat4(qOrient);
 	}
-	else if (curStop >= 6 && curStop < 12) //right
+	else if (curStop >= 6 && curStop < 11) //right
 	{
 		qOrient = glm::angleAxis(glm::radians(90.0f), vector3(0.0f, 0.0f, 1.0f));
 		//m4Model *= glm::toMat4(qOrient);
 	}
-	else if (curStop >= 12 && curStop < 18) //top
+	else if (curStop >= 11 && curStop < 18) //top
 	{
 		qOrient = glm::angleAxis(glm::radians(180.0f), vector3(1.0f, 0.0f, 0.0f));
 		//m4Model *= glm::toMat4(qOrient);
@@ -116,17 +119,22 @@ void Application::Display(void)
 		qOrient = glm::angleAxis(glm::radians(-90.0f), vector3(0.0f, 0.0f, 1.0f));
 		//m4Model *= glm::toMat4(qOrient);
 	}
-	else if (curStop >= 30 && curStop < 36) //bottom
+	else if (curStop >= 30 && curStop < 35) //bottom
 	{
 		qOrient = glm::angleAxis(glm::radians(0.0f), vector3(1.0f, 0.0f, 0.0f));
 		//m4Model *= glm::toMat4(qOrient);
 	}
+	else if (curStop == 35) //bottom
+	{
+		qOrient = glm::angleAxis(glm::radians(-90.0f), vector3(1.0f, 0.0f, 0.0f));
+		//m4Model *= glm::toMat4(qOrient);
+	}
 	
+	m4Model *= glm::toMat4(m_qArcBall);
 	m4Model *= glm::toMat4(qOrient);
-	m4Model *= ToMatrix4(m_qArcBall);
-
 
 	m_pMesh->Render(m4Projection, m4View, m4Model);
+	
 #pragma region DOES NOT NEED CHANGES
 	/*
 		This part does not need any changes at all, it is just for rendering the guide cube, the 
