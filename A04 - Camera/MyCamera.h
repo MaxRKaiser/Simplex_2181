@@ -15,10 +15,10 @@ class MyCamera
 	vector3 m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
 	vector3 m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	vector3 m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
+	vector3 m_v3Front = vector3(0.0f, 0.0f, -1.0f); //front vector of camera
+	vector3 m_v3Right = vector3(1.0f, 0.0f, 0.0f); //rigth vector of camera
 
 	bool m_bPerspective = true; //perspective view? False is Orthographic
-
-	float m_fFOV = 45.0f; //Field of View
 
 	vector2 m_v2Resolution = vector2(1280.0f, 720.0f); //Resolution of the window
 	vector2 m_v2NearFar = vector2(0.001f, 1000.0f); //Near and Far planes
@@ -29,6 +29,8 @@ class MyCamera
 	matrix4 m_m4View; //View matrix
 	matrix4 m_m4Projection; //Projection Matrix
 public:
+
+	float m_fFOV = 45.0f; //Field of View
 	/*
 	USAGE: Constructor
 	ARGUMENTS: ---
@@ -218,18 +220,17 @@ public:
 	OUTPUT: ---
 	*/
 	void MoveForward(float a_fDistance = 0.1f);
+
 	/*
-	USAGE: Translates the camera Upward or downward
-	ARGUMENTS: float a_fDistance = 0.1f -> amount of movement
-	OUTPUT: ---
-	*/
-	void MoveVertical(float a_fDistance = 0.1f);
-	/*
-	USAGE: Translates the camera right or left
+	USAGE: Translates the camera left
 	ARGUMENTS: float a_fDistance = 0.1f -> amount of movement
 	OUTPUT: ---
 	*/
 	void MoveSideways(float a_fDistance = 0.1f);
+
+	void rotCamera(float yaw, float pitch);
+	void zoomCamera(float offSet);
+	void barrelRoll(float angle);
 };
 
 } //namespace Simplex

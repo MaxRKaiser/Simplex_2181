@@ -1,4 +1,5 @@
 #include "MyCamera.h"
+#include <iostream>
 using namespace Simplex;
 
 //Accessors
@@ -103,6 +104,7 @@ void Simplex::MyCamera::ResetCamera(void)
 	m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
 	m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
+	m_v3Front = vector3(0.0f, 0.0f, -1.0f); //what's in front of me
 
 	m_bPerspective = true; //perspective view? False is Orthographic
 
@@ -123,6 +125,8 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 	m_v3Position = a_v3Position;
 	m_v3Target = a_v3Target;
 
+	//m_v3Front = glm::normalize( m_v3Position - m_v3Target);
+
 	m_v3Above = a_v3Position + glm::normalize(a_v3Upward);
 	
 	//Calculate the Matrix
@@ -132,7 +136,8 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
 	//Calculate the look at most of your assignment will be reflected in this method
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, glm::normalize(m_v3Above - m_v3Position)); //position, target, upward
+	//m_m4View = glm::lookAt(m_v3Position, m_v3Target, glm::normalize(m_v3Above - m_v3Position)); //position, target, upward
+	m_m4View = glm::lookAt(m_v3Position, m_v3Position + m_v3Front, m_v3Above);
 }
 
 void Simplex::MyCamera::CalculateProjectionMatrix(void)
@@ -150,13 +155,65 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 	}
 }
 
+//Move camera forward or backward with input from the keyboard
 void MyCamera::MoveForward(float a_fDistance)
 {
-	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, -a_fDistance);
-	m_v3Above += vector3(0.0f, 0.0f, -a_fDistance);
+	m_v3Position += a_fDistance * m_v3Front;
 }
 
-void MyCamera::MoveVertical(float a_fDistance){}//Needs to be defined
-void MyCamera::MoveSideways(float a_fDistance){}//Needs to be defined
+//Move camera right or left with keyboard input passed in
+void MyCamera::MoveSideways(float a_fDistance)
+{
+	m_v3Position += glm::normalize(glm::cross(m_v3Front, m_v3Above)) * -a_fDistance;
+}
+
+//Rotate Camera (yaw and pitch) with input values from right-click mouse movement
+void MyCamera::rotCamera(float yaw, float pitch)
+{
+	//horizontal movement [OLD]
+	//glm::quat rotHor = glm::angleAxis(glm::radians(-angleY), vector3(0.0f, 1.0f, 0.0f));
+	//m_v3Target = rotHor * m_v3Target;
+	//vertical movement [OLD]
+	//glm::quat rotVert = glm::angleAxis(glm::radians(angleX), vector3(1.0f, 0.0f, 0.0f));
+	//m_v3Target = rotVert * m_v3Target;
+
+	//temp vector
+	glm::vec3 frontTemp;
+
+	//The trig
+	frontTemp.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	frontTemp.y = sin(glm::radians(pitch));
+	frontTemp.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	m_v3Front = glm::normalize(frontTemp);
+
+	m_v3Right = glm::normalize(glm::cross(vector3(0.0f, 1.0f, 0.0f), m_v3Front));
+	m_v3Above = glm::cross(m_v3Front, m_v3Right);
+
+}
+
+//Zoom the camera in based on a scrollwheel-determined offset
+void MyCamera::zoomCamera(float offSet)
+{
+	//update and constrain FOV
+	if (m_fFOV >= 44.5f && m_fFOV <= 45.5f)
+		m_fFOV -= offSet * 0.25f;
+	if (m_fFOV <= 44.5f)
+		m_fFOV = 44.5f;
+	if (m_fFOV >= 45.5f)
+		m_fFOV = 45.5f;
+
+	//recalculate projection matrix with new FOV
+	CalculateProjectionMatrix();
+}
+
+//barrel roll the camera
+void MyCamera::barrelRoll(float angle)
+{
+
+	quaternion qTemp = glm::angleAxis(angle, m_v3Front);
+	m_v3Above = m_v3Above * qTemp;
+
+	m_v3Right = glm::normalize(glm::cross(m_v3Above, m_v3Front));
+
+}
+
