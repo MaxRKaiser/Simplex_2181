@@ -184,11 +184,16 @@ void MyCamera::rotCamera(float yaw, float pitch)
 	frontTemp.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	frontTemp.y = sin(glm::radians(pitch));
 	frontTemp.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	m_v3Front = glm::normalize(frontTemp);
+	//m_v3Front = glm::normalize(frontTemp);
+	m_v3Front = glm::lerp(m_v3Front, frontTemp , 0.25f);
 
 	m_v3Right = glm::normalize(glm::cross(vector3(0.0f, 1.0f, 0.0f), m_v3Front));
-	m_v3Above = glm::cross(m_v3Front, m_v3Right);
 
+	vector3 m_v3AboveTemp = glm::cross(m_v3Front, m_v3Right);
+
+	//Switch activation of the two lines below for lerping after roll + more floaty camera
+	//m_v3Above = glm::lerp(m_v3Above, m_v3AboveTemp, 0.1f);
+	m_v3Above = m_v3AboveTemp;
 }
 
 //Zoom the camera in based on a scrollwheel-determined offset
