@@ -438,7 +438,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	for (uint i = 0; i < 3; i++)
 	{
 		progLen1.push_back(abs(glm::dot(m_v3HalfWidth, xyz1[i])));
-		progLen2.push_back(abs(glm::dot(m_v3HalfWidth, xyz2[i])));
+		progLen2.push_back(abs(glm::dot(a_pOther->m_v3HalfWidth, xyz2[i])));
 	}
 
 	//rot matrix expressing b in a
@@ -480,9 +480,9 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//test L = B0, L = B1, L = B2
 	for (uint i = 0; i < 3; i++)
 	{
-		r2 = progLen2[i];
 		r1 = progLen1[0] * AbsR[0][i] + progLen1[1] * AbsR[1][i] + progLen1[2] * AbsR[2][i];
-		if (abs(t[0]) + t[1] + t[2] > r1 + r2)
+		r2 = progLen2[i];
+		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[1][i]) > r1 + r2)
 		{
 			m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 			return 1;
