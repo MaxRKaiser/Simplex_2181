@@ -285,8 +285,293 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	find a separating axis you need to return 0, there is an enum in
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
+
+
+
+	struct OBB {
+	//////Point c;      // OBB center point
+	//////Vector u[3];  // Local x-, y-, and z-axes
+	//////Vector e;     // Positive halfwidth extents of OBB along each axis
+	};
+
+	int TestOBBOBB(OBB &a, OBB &b)
+{
+	float ra, rb;
+	Matrix33 R, AbsR;
+
+	// Compute rotation matrix expressing b in a's coordinate frame
+	for (int i = 0; i < 3; i++)
+	   for (int j = 0; j < 3; j++)
+		   R[i][j] = Dot(a.u[i], b.u[j]);
+
+	// Compute translation vector t
+	Vector t = b.c - a.c;
+	// Bring translation into a's coordinate frame
+	t = Vector(Dot(t, a.u[0]), Dot(t, a.u[2]), Dot(t, a.u[2]));
+
+	// Compute common subexpressions. Add in an epsilon term to
+	// counteract arithmetic errors when two edges are parallel and
+	// their cross product is (near) null (see text for details)
+	for (int i = 0; i < 3; i++)
+	   for (int j = 0; j < 3; j++)
+		   AbsR[i][j] = Abs(R[i][j]) + EPSILON;
+
+	// Test axes L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++) {
+		ra = a.e[i];
+		rb = b.e[0] * AbsR[i][0] + b.e[1] * AbsR[i][1] + b.e[2] * AbsR[i][2];
+		if (Abs(t[i]) > ra + rb) return 0;
+	}
+
+	// Test axes L = B0, L = B1, L = B2
+	for (int i = 0; i < 3; i++) {
+		ra = a.e[0] * AbsR[0][i] + a.e[1] * AbsR[1][i] + a.e[2] * AbsR[2][i];
+		rb = b.e[i];
+		if (Abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb) return 0;
+	}
+
+	// Test axis L = A0 x B0
+	ra = a.e[1] * AbsR[2][0] + a.e[2] * AbsR[1][0];
+	rb = b.e[1] * AbsR[0][2] + b.e[2] * AbsR[0][1];
+	if (Abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) return 0;
+
+	// Test axis L = A0 x B1
+	ra = a.e[1] * AbsR[2][1] + a.e[2] * AbsR[1][1];
+	rb = b.e[0] * AbsR[0][2] + b.e[2] * AbsR[0][0];
+	if (Abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) return 0;
+
+	// Test axis L = A0 x B2
+	ra = a.e[1] * AbsR[2][2] + a.e[2] * AbsR[1][2];
+	rb = b.e[0] * AbsR[0][1] + b.e[1] * AbsR[0][0];
+	if (Abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) return 0;
+
+	// Test axis L = A1 x B0
+	ra = a.e[0] * AbsR[2][0] + a.e[2] * AbsR[0][0];
+	rb = b.e[1] * AbsR[1][2] + b.e[2] * AbsR[1][1];
+
+	if (Abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) return 0;
+
+	// Test axis L = A1 x B1
+	ra = a.e[0] * AbsR[2][1] + a.e[2] * AbsR[0][1];
+	rb = b.e[0] * AbsR[1][2] + b.e[2] * AbsR[1][0];
+	if (Abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) return 0;
+
+	// Test axis L = A1 x B2
+	ra = a.e[0] * AbsR[2][2] + a.e[2] * AbsR[0][2];
+	rb = b.e[0] * AbsR[1][1] + b.e[1] * AbsR[1][0];
+	if (Abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) return 0;
+
+	// Test axis L = A2 x B0
+	ra = a.e[0] * AbsR[1][0] + a.e[1] * AbsR[0][0];
+	rb = b.e[1] * AbsR[2][2] + b.e[2] * AbsR[2][1];
+	if (Abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) return 0;
+
+	// Test axis L = A2 x B1
+	ra = a.e[0] * AbsR[1][1] + a.e[1] * AbsR[0][1];
+	rb = b.e[0] * AbsR[2][2] + b.e[2] * AbsR[2][0];
+	if (Abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) return 0;
+
+	// Test axis L = A2 x B2
+	ra = a.e[0] * AbsR[1][2] + a.e[1] * AbsR[0][2];
+	rb = b.e[0] * AbsR[2][1] + b.e[1] * AbsR[2][0];
+	if (Abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) return 0;
+
+	// Since no separating axis is found, the OBBs must be intersecting
+	return 1;
+	}
 	*/
+
+	//centers
+	vector3 c1 = this->m_v3Center;
+	vector3 c2 = a_pOther->m_v3Center;
+
+	c1 = vector4(c1, 0.0f) * m_m4ToWorld;
+	c1 = glm::normalize(c1);
+	c2 = vector4(c2, 0.0f) * m_m4ToWorld;
+	c2 = glm::normalize(c2);
+
+	//test variables
+	float r1;
+	float r2;
+
+	//vector to store local axes
+	std::vector<vector3> xyz1;
+	std::vector<vector3> xyz2;
+
+	//local axes for this rigidbody
+	vector3 x1 = vector3(1.0f, 0.0f, 0.0f);
+	x1 = vector4(x1, 0.0f) * m_m4ToWorld;
+	x1 = glm::normalize(x1);
+	xyz1.push_back(x1);
+
+	vector3 y1 = vector3(0.0f, 1.0f, 0.0f);
+	y1 = vector4(y1, 0.0f) * m_m4ToWorld;
+	y1 = glm::normalize(y1);
+	xyz1.push_back(y1);
+
+	vector3 z1 = vector3(0.0f, 0.0f, 1.0f);
+	z1 = vector4(z1, 0.0f) * m_m4ToWorld;
+	z1 = glm::normalize(z1);
+	xyz1.push_back(z1);
+
+	//local axes for other rigidbody
+	vector3 x2 = vector3(1.0f, 0.0f, 0.0f);
+	x2 = vector4(x2, 0.0f) * a_pOther->m_m4ToWorld;
+	x2 = glm::normalize(x2);
+	xyz2.push_back(x2);
+
+	vector3 y2 = vector3(0.0f, 1.0f, 0.0f);
+	y2 = vector4(y2, 0.0f) * a_pOther->m_m4ToWorld;
+	y2 = glm::normalize(y2);
+	xyz2.push_back(y2);
+
+	vector3 z2 = vector3(0.0f, 0.0f, 1.0f);
+	z2 = vector4(z2, 0.0f) * a_pOther->m_m4ToWorld;
+	z2 = glm::normalize(z2);
+	xyz2.push_back(z2);
+
+	//to hold halfwidths projection results
+	std::vector<float> progLen1;
+	std::vector<float> progLen2;
+
+	//project halfwidth on each axis
+	for (uint i = 0; i < 3; i++)
+	{
+		progLen1.push_back(abs(glm::dot(m_v3HalfWidth, xyz1[i])));
+		progLen2.push_back(abs(glm::dot(m_v3HalfWidth, xyz2[i])));
+	}
+
+	//rot matrix expressing b in a
+	matrix3 R, AbsR;
+	for (uint i = 0; i < 3; i++)
+	{
+		for (uint j = 0; j < 3; j++)
+		{
+			R[i][j] = glm::dot(xyz1[i], xyz2[j]);
+		}
+	}
+
+	//compute translation vector
+	vector3 t = c2 - c1;
+	//change vector to a
+	t = vector3(glm::dot(t, xyz1[0]), glm::dot(t, xyz1[1]), glm::dot(t, xyz1[2]));
+
+	//Compute common subexpressions
+	for (uint i = 0; i < 3; i++)
+	{
+		for (uint j = 0; j < 3; j++)
+		{
+			AbsR[i][j] = abs(R[i][j]) + DBL_EPSILON;
+		}
+	}
+
+	//test L = A0, L = A1, L = A2
+	for (uint i = 0; i < 3; i++)
+	{
+		r1 = progLen1[i];
+		r2 = progLen2[0] * AbsR[i][0] + progLen2[1] * AbsR[i][1] + progLen2[2] * AbsR[i][2];
+		if (abs(t[i]) > r1 + r2)
+		{
+			m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+			return 1;
+		}
+	}
+
+	//test L = B0, L = B1, L = B2
+	for (uint i = 0; i < 3; i++)
+	{
+		r2 = progLen2[i];
+		r1 = progLen1[0] * AbsR[0][i] + progLen1[1] * AbsR[1][i] + progLen1[2] * AbsR[2][i];
+		if (abs(t[0]) + t[1] + t[2] > r1 + r2)
+		{
+			m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+			return 1;
+		}
+
+	}
+
+	//test L = A0 x B0
+	r1 = progLen1[1] * AbsR[2][0] + progLen1[2] * AbsR[1][0];
+	r2 = progLen2[1] * AbsR[0][2] + progLen2[2] * AbsR[0][1];
+	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A0 x B1
+	r1 = progLen1[1] * AbsR[2][1] + progLen1[2] * AbsR[1][1];
+	r2 = progLen2[0] * AbsR[0][2] + progLen2[2] * AbsR[0][0];
+	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A0 x B2
+	r1 = progLen1[1] * AbsR[2][2] + progLen1[2] * AbsR[1][2];
+	r2 = progLen2[0] * AbsR[0][1] + progLen2[1] * AbsR[0][0];
+	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A1 x B0
+	r1 = progLen1[0] * AbsR[2][0] + progLen1[2] * AbsR[0][0];
+	r2 = progLen2[1] * AbsR[1][2] + progLen2[2] * AbsR[1][1];
+	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A1 x B1
+	r1 = progLen1[0] * AbsR[2][1] + progLen1[2] * AbsR[0][1];
+	r2 = progLen2[0] * AbsR[1][2] + progLen2[2] * AbsR[1][0];
+	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A1 x B2
+	r1 = progLen1[0] * AbsR[2][2] + progLen1[2] * AbsR[0][2];
+	r2 = progLen2[0] * AbsR[1][1] + progLen2[1] * AbsR[1][0];
+	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A2 x B0
+	r1 = progLen1[0] * AbsR[1][0] + progLen1[1] * AbsR[0][0];
+	r2 = progLen2[1] * AbsR[2][2] + progLen2[2] * AbsR[2][1];
+	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A2 x B1
+	r1 = progLen1[0] * AbsR[1][1] + progLen1[1] * AbsR[0][1];
+	r2 = progLen2[0] * AbsR[2][2] + progLen2[2] * AbsR[2][0];
+	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
+
+	//test L = A2 x B2
+	r1 = progLen1[0] * AbsR[1][2] + progLen1[1] * AbsR[0][2];
+	r2 = progLen2[0] * AbsR[2][1] + progLen2[1] * AbsR[2][0];
+	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > r1 + r2)
+	{
+		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
+		return 1;
+	}
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
+
 }
