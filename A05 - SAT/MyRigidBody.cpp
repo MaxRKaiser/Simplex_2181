@@ -382,13 +382,14 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	*/
 
 	//centers
-	vector3 c1 = this->m_v3Center;
-	vector3 c2 = a_pOther->m_v3Center;
+	//vector3 c1 = m_v3Center;
+	//vector3 c2 = a_pOther->m_v3Center;
+	
+	vector3 c1 = GetCenterGlobal();
+	vector3 c2 = a_pOther->GetCenterGlobal();
 
-	c1 = vector4(c1, 0.0f) * m_m4ToWorld;
-	c1 = glm::normalize(c1);
-	c2 = vector4(c2, 0.0f) * m_m4ToWorld;
-	c2 = glm::normalize(c2);
+	//c1 = vector4(c1, 0.0f) * m_m4ToWorld;
+	//c2 = vector4(c2, 0.0f) * a_pOther->m_m4ToWorld;
 
 	//test variables
 	float r1;
@@ -434,11 +435,19 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	std::vector<float> progLen1;
 	std::vector<float> progLen2;
 
+	vector3 half1 = m_v3HalfWidth;
+	half1 = vector4(half1, 1.0f) * m_m4ToWorld;
+	//half1 = glm::normalize(half1);
+
+	vector3 half2 = a_pOther->m_v3HalfWidth;
+	half2 = vector4(half2, 1.0f) * m_m4ToWorld;
+	//half2 = glm::normalize(half2);
+
 	//project halfwidth on each axis
 	for (uint i = 0; i < 3; i++)
 	{
-		progLen1.push_back(abs(glm::dot(m_v3HalfWidth, xyz1[i])));
-		progLen2.push_back(abs(glm::dot(a_pOther->m_v3HalfWidth, xyz2[i])));
+		progLen1.push_back(abs(glm::dot(half1, xyz1[i])));
+		progLen2.push_back(abs(glm::dot(half2, xyz2[i])));
 	}
 
 	//rot matrix expressing b in a
@@ -472,7 +481,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		r2 = progLen2[0] * AbsR[i][0] + progLen2[1] * AbsR[i][1] + progLen2[2] * AbsR[i][2];
 		if (abs(t[i]) > r1 + r2)
 		{
-			m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 			return 1;
 		}
 	}
@@ -484,7 +492,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		r2 = progLen2[i];
 		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[1][i]) > r1 + r2)
 		{
-			m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 			return 1;
 		}
 
@@ -495,7 +502,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[1] * AbsR[0][2] + progLen2[2] * AbsR[0][1];
 	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -504,7 +510,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[0][2] + progLen2[2] * AbsR[0][0];
 	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -513,7 +518,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[0][1] + progLen2[1] * AbsR[0][0];
 	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -522,7 +526,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[1] * AbsR[1][2] + progLen2[2] * AbsR[1][1];
 	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -531,7 +534,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[1][2] + progLen2[2] * AbsR[1][0];
 	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -540,7 +542,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[1][1] + progLen2[1] * AbsR[1][0];
 	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -549,7 +550,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[1] * AbsR[2][2] + progLen2[2] * AbsR[2][1];
 	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -558,7 +558,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[2][2] + progLen2[2] * AbsR[2][0];
 	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
@@ -567,7 +566,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[2][1] + progLen2[1] * AbsR[2][0];
 	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > r1 + r2)
 	{
-		m_pMeshMngr->GeneratePlane(10.0f, C_RED);
 		return 1;
 	}
 
