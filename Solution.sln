@@ -117,6 +117,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "A06 - Octree", "A06 - Octre
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ex01H", "kaisM_Ex01\Ex01H.vcxproj", "{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "A05 - SAT", "A05 - SAT2\A05 - SAT.vcxproj", "{8C8826D0-B9BD-4CAA-B21C-6F52C7F57B59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -313,6 +315,10 @@ Global
 		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Debug|x86.Build.0 = Debug|Win32
 		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Release|x86.ActiveCfg = Release|Win32
 		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Release|x86.Build.0 = Release|Win32
+		{8C8826D0-B9BD-4CAA-B21C-6F52C7F57B59}.Debug|x86.ActiveCfg = Debug|Win32
+		{8C8826D0-B9BD-4CAA-B21C-6F52C7F57B59}.Debug|x86.Build.0 = Debug|Win32
+		{8C8826D0-B9BD-4CAA-B21C-6F52C7F57B59}.Release|x86.ActiveCfg = Release|Win32
+		{8C8826D0-B9BD-4CAA-B21C-6F52C7F57B59}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

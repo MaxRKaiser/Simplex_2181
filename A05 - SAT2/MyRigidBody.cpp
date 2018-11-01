@@ -391,56 +391,78 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//c1 = vector4(c1, 0.0f) * m_m4ToWorld;
 	//c2 = vector4(c2, 0.0f) * a_pOther->m_m4ToWorld;
 
+
+	// Get the information of this object
+	//vector3 v3CenterGlobalA = GetCenterGlobal();
+	matrix4 mToWorldA = GetModelMatrix();
+	//vector3 v3RotationA[3];
+	
+	//Get the information of the a_pOther object
+	//vector3 v3CenterGlobalB = a_pOther->GetCenterGlobal();
+	matrix4 mToWorldB = a_pOther->GetModelMatrix();
+	//vector3 v3RotationB[3];
+	
+
 	//test variables
 	float r1;
 	float r2;
 
 	//vector to store local axes
 	std::vector<vector3> xyz1;
-	std::vector<vector3> xyz2;
+	xyz1.push_back(vector3(mToWorldA[0][0], mToWorldA[0][1], mToWorldA[0][2]));
+	xyz1.push_back(vector3(mToWorldA[1][0], mToWorldA[1][1], mToWorldA[1][2]));
+	xyz1.push_back(vector3(mToWorldA[2][0], mToWorldA[2][1], mToWorldA[2][2]));
 
+	std::vector<vector3> xyz2;
+	xyz2.push_back(vector3(mToWorldB[0][0], mToWorldB[0][1], mToWorldB[0][2]));
+	xyz2.push_back(vector3(mToWorldB[1][0], mToWorldB[1][1], mToWorldB[1][2]));
+	xyz2.push_back(vector3(mToWorldB[2][0], mToWorldB[2][1], mToWorldB[2][2]));
+
+	/*
 	//local axes for this rigidbody
 	vector3 x1 = vector3(1.0f, 0.0f, 0.0f);
-	x1 = m_m4ToWorld * vector4(x1, 0.0f);
+	x1 = m_m4ToWorld * vector4(x1, 1.0f);
 	x1 = glm::normalize(x1);
-	xyz1.push_back(x1);
+	//xyz1.push_back(x1);
 
 	vector3 y1 = vector3(0.0f, 1.0f, 0.0f);
-	y1 = m_m4ToWorld * vector4(y1, 0.0f);
+	y1 = m_m4ToWorld * vector4(y1, 1.0f);
 	y1 = glm::normalize(y1);
-	xyz1.push_back(y1);
+	//xyz1.push_back(y1);
 
 	vector3 z1 = vector3(0.0f, 0.0f, 1.0f);
-	z1 = m_m4ToWorld * vector4(z1, 0.0f);
+	z1 = m_m4ToWorld * vector4(z1, 1.0f);
 	z1 = glm::normalize(z1);
-	xyz1.push_back(z1);
+	//xyz1.push_back(z1);
 
 	//local axes for other rigidbody
 	vector3 x2 = vector3(1.0f, 0.0f, 0.0f);
-	x2 = a_pOther->m_m4ToWorld * vector4(x2, 0.0f);
+	x2 = a_pOther->m_m4ToWorld * vector4(x2, 1.0f);
 	x2 = glm::normalize(x2);
-	xyz2.push_back(x2);
+	//xyz2.push_back(x2);
 
 	vector3 y2 = vector3(0.0f, 1.0f, 0.0f);
-	y2 = a_pOther->m_m4ToWorld * vector4(y2, 0.0f);
+	y2 = a_pOther->m_m4ToWorld * vector4(y2, 1.0f);
 	y2 = glm::normalize(y2);
-	xyz2.push_back(y2);
+	//xyz2.push_back(y2);
 
 	vector3 z2 = vector3(0.0f, 0.0f, 1.0f);
-	z2 = a_pOther->m_m4ToWorld * vector4(z2, 0.0f);
+	z2 = a_pOther->m_m4ToWorld * vector4(z2, 1.0f);
 	z2 = glm::normalize(z2);
-	xyz2.push_back(z2);
+	//xyz2.push_back(z2);
+
+	*/
 
 	//to hold halfwidths projection results
 	std::vector<float> progLen1;
 	std::vector<float> progLen2;
 
 	vector3 half1 = m_v3HalfWidth;
-	//half1 = vector4(half1, 1.0f) * m_m4ToWorld;
+	//half1 = m_m4ToWorld * vector4(half1, 1.0f);
 	//half1 = glm::normalize(half1);
 
 	vector3 half2 = a_pOther->m_v3HalfWidth;
-	//half2 = vector4(half2, 1.0f) * m_m4ToWorld;
+	//half2 = m_m4ToWorld * vector4(half2, 1.0f);
 	//half2 = glm::normalize(half2);
 
 	//project halfwidth on each axis
@@ -474,6 +496,61 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 
+	// Test axis AX
+	r1 = m_v3HalfWidth.x;
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[0][0] + a_pOther->m_v3HalfWidth.y * AbsR[0][1] + a_pOther->m_v3HalfWidth.z * AbsR[0][2];
+	if (std::abs(t.x) > r1 + r2)
+	{
+		printf("Axis X first object\n");
+		return 1;
+	}
+
+	// Test axis AY
+	r1 = m_v3HalfWidth.y;
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[1][0] + a_pOther->m_v3HalfWidth.y * AbsR[1][1] + a_pOther->m_v3HalfWidth.z * AbsR[1][2];
+	if (std::abs(t.y) > r1 + r2)
+	{
+		printf("Axis Y first object\n");
+		return 1;
+	}
+
+	// Test axis AZ
+	r1 = m_v3HalfWidth.z;
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[2][0] + a_pOther->m_v3HalfWidth.y * AbsR[2][1] + a_pOther->m_v3HalfWidth.z * AbsR[2][2];
+	if (std::abs(t.z) > r1 + r2)
+	{
+		printf("Axis Z first object\n");
+		return 1;
+	}
+
+	// Test axis BX
+	r1 = m_v3HalfWidth.x * AbsR[0][0] + m_v3HalfWidth.y * AbsR[1][0] + m_v3HalfWidth.z * AbsR[2][0];
+	r2 = a_pOther->m_v3HalfWidth.x;
+	if (std::abs(t.x * xyz2[0][0] + t.y * xyz2[1][0] + t.z * xyz2[2][0]) > r1 + r2)
+	{
+		printf("Axis X second object\n");
+		return 1;
+	}
+
+	// Test axis BY
+	r1 = m_v3HalfWidth.x * AbsR[0][1] + m_v3HalfWidth.y * AbsR[1][1] + m_v3HalfWidth.z * AbsR[2][1];
+	r2 = a_pOther->m_v3HalfWidth.y;
+	if (std::abs(t.x * xyz2[0][1] + t.y * xyz2[1][1] + t.z * xyz2[2][1]) > r1 + r2)
+	{
+		printf("Axis Y second object\n");
+		return 1;
+	}
+
+	// Test axis BZ
+	r1 = m_v3HalfWidth.x * AbsR[0][2] + m_v3HalfWidth.y * AbsR[1][2] + m_v3HalfWidth.z * AbsR[2][2];
+	r2 = a_pOther->m_v3HalfWidth.z;
+	if (std::abs(t.x * xyz2[0][2] + t.y * xyz2[1][2] + t.z * xyz2[2][2]) > r1 + r2)
+	{
+		printf("Axis Z second object\n");
+		return 1;
+	}
+
+/*
 	//test L = A0, L = A1, L = A2
 	for (uint i = 0; i < 3; i++)
 	{
@@ -490,80 +567,80 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		r1 = progLen1[0] * AbsR[0][i] + progLen1[1] * AbsR[1][i] + progLen1[2] * AbsR[2][i];
 		r2 = progLen2[i];
-		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > r1 + r2)
+		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[1][i]) > r1 + r2)
 		{
 			return 1;
 		}
 
 	}
-
+	*/
 	//test L = A0 x B0
-	r1 = progLen1[1] * AbsR[2][0] + progLen1[2] * AbsR[1][0];
-	r2 = progLen2[1] * AbsR[0][2] + progLen2[2] * AbsR[0][1];
+	r1 = m_v3HalfWidth.y * AbsR[2][0] + m_v3HalfWidth.z * AbsR[1][0];
+	r2 = a_pOther->m_v3HalfWidth.y * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][1];
 	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A0 x B1
-	r1 = progLen1[1] * AbsR[2][1] + progLen1[2] * AbsR[1][1];
-	r2 = progLen2[0] * AbsR[0][2] + progLen2[2] * AbsR[0][0];
+	r1 = m_v3HalfWidth.y * AbsR[2][1] + m_v3HalfWidth.z * AbsR[1][1];
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][0];
 	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A0 x B2
-	r1 = progLen1[1] * AbsR[2][2] + progLen1[2] * AbsR[1][2];
-	r2 = progLen2[0] * AbsR[0][1] + progLen2[1] * AbsR[0][0];
+	r1 = m_v3HalfWidth.y * AbsR[2][2] + m_v3HalfWidth.z * AbsR[1][2];
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[0][1] + a_pOther->m_v3HalfWidth.y * AbsR[0][0];
 	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A1 x B0
-	r1 = progLen1[0] * AbsR[2][0] + progLen1[2] * AbsR[0][0];
-	r2 = progLen2[1] * AbsR[1][2] + progLen2[2] * AbsR[1][1];
+	r1 = m_v3HalfWidth.x * AbsR[2][0] + m_v3HalfWidth.z * AbsR[0][0];
+	r2 = a_pOther->m_v3HalfWidth.y * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][1];
 	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A1 x B1
-	r1 = progLen1[0] * AbsR[2][1] + progLen1[2] * AbsR[0][1];
-	r2 = progLen2[0] * AbsR[1][2] + progLen2[2] * AbsR[1][0];
+	r1 = m_v3HalfWidth.x * AbsR[2][1] + m_v3HalfWidth.z * AbsR[0][1];
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][0];
 	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A1 x B2
-	r1 = progLen1[0] * AbsR[2][2] + progLen1[2] * AbsR[0][2];
-	r2 = progLen2[0] * AbsR[1][1] + progLen2[1] * AbsR[1][0];
+	r1 = m_v3HalfWidth.x * AbsR[2][2] + m_v3HalfWidth.z * AbsR[0][2];
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[1][1] + a_pOther->m_v3HalfWidth.y * AbsR[1][0];
 	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A2 x B0
-	r1 = progLen1[0] * AbsR[1][0] + progLen1[1] * AbsR[0][0];
-	r2 = progLen2[1] * AbsR[2][2] + progLen2[2] * AbsR[2][1];
+	r1 = m_v3HalfWidth.x * AbsR[1][0] + m_v3HalfWidth.y * AbsR[0][0];
+	r2 = a_pOther->m_v3HalfWidth.y * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][1];
 	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A2 x B1
-	r1 = progLen1[0] * AbsR[1][1] + progLen1[1] * AbsR[0][1];
-	r2 = progLen2[0] * AbsR[2][2] + progLen2[2] * AbsR[2][0];
+	r1 = m_v3HalfWidth.x * AbsR[1][1] + m_v3HalfWidth.y * AbsR[0][1];
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][0];
 	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > r1 + r2)
 	{
 		return 1;
 	}
 
 	//test L = A2 x B2
-	r1 = progLen1[0] * AbsR[1][2] + progLen1[1] * AbsR[0][2];
-	r2 = progLen2[0] * AbsR[2][1] + progLen2[1] * AbsR[2][0];
+	r1 = m_v3HalfWidth.x * AbsR[1][2] + m_v3HalfWidth.y * AbsR[0][2];
+	r2 = a_pOther->m_v3HalfWidth.x * AbsR[2][1] + a_pOther->m_v3HalfWidth.y * AbsR[2][0];
 	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > r1 + r2)
 	{
 		return 1;
