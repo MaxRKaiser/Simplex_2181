@@ -454,26 +454,27 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	*/
 
 	//to hold halfwidths projection results
-	std::vector<float> progLen1;
-	std::vector<float> progLen2;
+	//std::vector<float> progLen1;
+	//std::vector<float> progLen2;
 
-	vector3 half1 = m_v3HalfWidth;
+	//vector3 half1 = m_v3HalfWidth;
 	//half1 = m_m4ToWorld * vector4(half1, 1.0f);
 	//half1 = glm::normalize(half1);
 
-	vector3 half2 = a_pOther->m_v3HalfWidth;
+	//vector3 half2 = a_pOther->m_v3HalfWidth;
 	//half2 = m_m4ToWorld * vector4(half2, 1.0f);
 	//half2 = glm::normalize(half2);
 
 	//project halfwidth on each axis
-	for (uint i = 0; i < 3; i++)
+	/*for (uint i = 0; i < 3; i++)
 	{
 		progLen1.push_back(abs(glm::dot(half1, xyz1[i])));
 		progLen2.push_back(abs(glm::dot(half2, xyz2[i])));
-	}
+	}*/
 
 	//rot matrix expressing b in a
-	matrix3 R, AbsR;
+	glm::mat3x3 R;
+	glm::mat3x3 AbsR;
 	for (uint i = 0; i < 3; i++)
 	{
 		for (uint j = 0; j < 3; j++)
@@ -483,7 +484,8 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	}
 
 	//compute translation vector
-	vector3 t = c2 - c1;
+	//vector3 t = c2 - c1;
+	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
 	//change vector to a
 	t = vector3(glm::dot(t, xyz1[0]), glm::dot(t, xyz1[1]), glm::dot(t, xyz1[2]));
 
@@ -579,6 +581,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.y * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][1];
 	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > r1 + r2)
 	{
+		printf("A0 x B0\n");
 		return 1;
 	}
 
@@ -587,6 +590,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.x * AbsR[0][2] + a_pOther->m_v3HalfWidth.z * AbsR[0][0];
 	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > r1 + r2)
 	{
+		printf("A0 x B1\n");
 		return 1;
 	}
 
@@ -595,6 +599,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.x * AbsR[0][1] + a_pOther->m_v3HalfWidth.y * AbsR[0][0];
 	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > r1 + r2)
 	{
+		printf("A0 x B2\n");
 		return 1;
 	}
 
@@ -603,6 +608,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.y * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][1];
 	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > r1 + r2)
 	{
+		printf("A1 x B0\n");
 		return 1;
 	}
 
@@ -611,6 +617,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.x * AbsR[1][2] + a_pOther->m_v3HalfWidth.z * AbsR[1][0];
 	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > r1 + r2)
 	{
+		printf("A1 x B1\n");
 		return 1;
 	}
 
@@ -619,6 +626,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.x * AbsR[1][1] + a_pOther->m_v3HalfWidth.y * AbsR[1][0];
 	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > r1 + r2)
 	{
+		printf("A1 x B2\n");
 		return 1;
 	}
 
@@ -627,6 +635,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.y * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][1];
 	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > r1 + r2)
 	{
+		printf("A2 x B0\n");
 		return 1;
 	}
 
@@ -635,6 +644,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.x * AbsR[2][2] + a_pOther->m_v3HalfWidth.z * AbsR[2][0];
 	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > r1 + r2)
 	{
+		printf("A2 x B1\n");
 		return 1;
 	}
 
@@ -643,6 +653,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = a_pOther->m_v3HalfWidth.x * AbsR[2][1] + a_pOther->m_v3HalfWidth.y * AbsR[2][0];
 	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > r1 + r2)
 	{
+		printf("A2 x B2\n");
 		return 1;
 	}
 

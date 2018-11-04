@@ -395,41 +395,52 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	float r1;
 	float r2;
 
+	matrix4 mToWorldA = GetModelMatrix();
+	matrix4 mToWorldB = a_pOther->GetModelMatrix();
+
 	//vector to store local axes
 	std::vector<vector3> xyz1;
 	std::vector<vector3> xyz2;
 
-	//local axes for this rigidbody
+	xyz1.push_back(vector3(mToWorldA[0][0], mToWorldA[0][1], mToWorldA[0][2]));
+	xyz1.push_back(vector3(mToWorldA[1][0], mToWorldA[1][1], mToWorldA[1][2]));
+	xyz1.push_back(vector3(mToWorldA[2][0], mToWorldA[2][1], mToWorldA[2][2]));
+
+	xyz2.push_back(vector3(mToWorldB[0][0], mToWorldB[0][1], mToWorldB[0][2]));
+	xyz2.push_back(vector3(mToWorldB[1][0], mToWorldB[1][1], mToWorldB[1][2]));
+	xyz2.push_back(vector3(mToWorldB[2][0], mToWorldB[2][1], mToWorldB[2][2]));
+
+	/*//local axes for this rigidbody
 	vector3 x1 = vector3(1.0f, 0.0f, 0.0f);
-	x1 = m_m4ToWorld * vector4(x1, 0.0f);
+	x1 = m_m4ToWorld * vector4(x1, 1.0f);
 	x1 = glm::normalize(x1);
 	xyz1.push_back(x1);
 
 	vector3 y1 = vector3(0.0f, 1.0f, 0.0f);
-	y1 = m_m4ToWorld * vector4(y1, 0.0f);
+	y1 = m_m4ToWorld * vector4(y1, 1.0f);
 	y1 = glm::normalize(y1);
 	xyz1.push_back(y1);
 
 	vector3 z1 = vector3(0.0f, 0.0f, 1.0f);
-	z1 = m_m4ToWorld * vector4(z1, 0.0f);
+	z1 = m_m4ToWorld * vector4(z1, 1.0f);
 	z1 = glm::normalize(z1);
 	xyz1.push_back(z1);
 
 	//local axes for other rigidbody
 	vector3 x2 = vector3(1.0f, 0.0f, 0.0f);
-	x2 = a_pOther->m_m4ToWorld * vector4(x2, 0.0f);
+	x2 = a_pOther->m_m4ToWorld * vector4(x2, 1.0f);
 	x2 = glm::normalize(x2);
 	xyz2.push_back(x2);
 
 	vector3 y2 = vector3(0.0f, 1.0f, 0.0f);
-	y2 = a_pOther->m_m4ToWorld * vector4(y2, 0.0f);
+	y2 = a_pOther->m_m4ToWorld * vector4(y2, 1.0f);
 	y2 = glm::normalize(y2);
 	xyz2.push_back(y2);
 
 	vector3 z2 = vector3(0.0f, 0.0f, 1.0f);
-	z2 = a_pOther->m_m4ToWorld * vector4(z2, 0.0f);
+	z2 = a_pOther->m_m4ToWorld * vector4(z2, 1.0f);
 	z2 = glm::normalize(z2);
-	xyz2.push_back(z2);
+	xyz2.push_back(z2); */
 
 	//to hold halfwidths projection results
 	std::vector<float> progLen1;
@@ -481,6 +492,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		r2 = progLen2[0] * AbsR[i][0] + progLen2[1] * AbsR[i][1] + progLen2[2] * AbsR[i][2];
 		if (abs(t[i]) > r1 + r2)
 		{
+			printf("Axes first object\n");
 			return 1;
 		}
 	}
@@ -492,6 +504,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		r2 = progLen2[i];
 		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > r1 + r2)
 		{
+			printf("Axes second object\n");
 			return 1;
 		}
 
@@ -502,6 +515,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[1] * AbsR[0][2] + progLen2[2] * AbsR[0][1];
 	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > r1 + r2)
 	{
+		printf("A0 x B0\n");
 		return 1;
 	}
 
@@ -510,6 +524,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[0][2] + progLen2[2] * AbsR[0][0];
 	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > r1 + r2)
 	{
+		printf("A0 x B1\n");
 		return 1;
 	}
 
@@ -518,6 +533,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[0][1] + progLen2[1] * AbsR[0][0];
 	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > r1 + r2)
 	{
+		printf("A0 x B2\n");
 		return 1;
 	}
 
@@ -526,6 +542,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[1] * AbsR[1][2] + progLen2[2] * AbsR[1][1];
 	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > r1 + r2)
 	{
+		printf("A1 x B0\n");
 		return 1;
 	}
 
@@ -534,6 +551,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[1][2] + progLen2[2] * AbsR[1][0];
 	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > r1 + r2)
 	{
+		printf("A1 x B1\n");
 		return 1;
 	}
 
@@ -542,6 +560,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[1][1] + progLen2[1] * AbsR[1][0];
 	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > r1 + r2)
 	{
+		printf("A1 x B2\n");
 		return 1;
 	}
 
@@ -550,6 +569,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[1] * AbsR[2][2] + progLen2[2] * AbsR[2][1];
 	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > r1 + r2)
 	{
+		printf("A2 x B0\n");
 		return 1;
 	}
 
@@ -558,6 +578,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[2][2] + progLen2[2] * AbsR[2][0];
 	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > r1 + r2)
 	{
+		printf("A2 x B1\n");
 		return 1;
 	}
 
@@ -566,6 +587,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	r2 = progLen2[0] * AbsR[2][1] + progLen2[1] * AbsR[2][0];
 	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > r1 + r2)
 	{
+		printf("A2 x B2\n");
 		return 1;
 	}
 
