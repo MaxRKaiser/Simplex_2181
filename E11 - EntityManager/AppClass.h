@@ -23,7 +23,7 @@ class Application
 	quaternion m_qCreeper; //orientation for the creeper
 		
 private:
-	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //programmer
+	String m_sProgrammer = "Max Kaiser - mrk5790@rit.edu"; //programmer
 
 	static ImGuiObject gui; //GUI object
 	bool m_bGUI_Main = true; //show Main GUI window?
