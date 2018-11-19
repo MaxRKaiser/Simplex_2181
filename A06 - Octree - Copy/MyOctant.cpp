@@ -69,7 +69,7 @@ void MyOctant::Subdivide()
 
 	//only divide again if there are enough objects to justify it
 	IsColliding2();
-	if (colNum > 5)
+	if (colNum > 3)
 	{
 		vector3 v3Center = m_pRigidBody->GetCenterLocal();
 		vector3 v3HalfWidth = m_pRigidBody->GetHalfWidth();
@@ -109,10 +109,12 @@ void MyOctant::Release(void)
 }
 void Simplex::MyOctant::Display(int index)
 {
+	//displays only the current octant we've indexed to (if not a fallback index)
 	if (index == m_iID)
 	{
 		m_pRigidBody->AddToRenderList();
 	}
+	//fallback index of -1 displays all octants
 	else if (index == -1)
 	{
 		m_pRigidBody->AddToRenderList();
@@ -122,6 +124,7 @@ void Simplex::MyOctant::Display(int index)
 				m_pChild[i]->Display(-1);
 		}
 	}
+	//if were not at the fallback index, but we haven't found the octant we're looking for, look at the children
 	else if (index > -1)
 	{
 		for (uint i = 0; i < 8; i++)
@@ -134,6 +137,7 @@ void Simplex::MyOctant::Display(int index)
 	//m_pMeshMngr->AddWireCubeToRenderList(glm::scale(vector3(70)), C_BLUE);
 }
 
+//check for how many cubes are colliding with the octant
 void Simplex::MyOctant::IsColliding2(void)
 {
 	std::vector<MyEntity*> l_Entity_List = m_pEntityMngr->GetEntityList();
@@ -143,10 +147,12 @@ void Simplex::MyOctant::IsColliding2(void)
 		MyRigidBody* pRB = l_Entity_List[i]->GetRigidBody();
 		if (pRB->IsColliding(m_pRigidBody))
 		{
+			//add to this whenever we find a colliding cube
 			colNum++;
 		}
 	}
 }
+
 void Simplex::MyOctant::IsColliding(void)
 {
 	std::vector<MyEntity*> l_Entity_List = m_pEntityMngr->GetEntityList();

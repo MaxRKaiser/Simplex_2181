@@ -27,6 +27,7 @@ class MyOctant
 	
 public:
 	uint colNum; //number of objects colliding with this
+	//what level into the tree are we
 	int levels;
 	//display octant based on current index
 	void Display(int index);
