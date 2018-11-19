@@ -25,7 +25,6 @@ void Simplex::MyEntity::Init(void)
 	m_bSetAxis = false;
 	m_pModel = nullptr;
 	m_pRigidBody = nullptr;
-	//m_DimensionArray = nullptr;
 	m_m4ToWorld = IDENTITY_M4;
 	m_sUniqueID = "";
 	m_nDimensionCount = 0;
@@ -44,19 +43,13 @@ void Simplex::MyEntity::Swap(MyEntity& other)
 	std::swap(m_DimensionList, other.m_DimensionList);
 	std::swap(m_nDimensionCount, other.m_nDimensionCount);
 	std::swap(m_uMainDimension, other.m_uMainDimension);
-	//std::swap(m_DimensionArray, other.m_DimensionArray);
 }
 void Simplex::MyEntity::Release(void)
 {
 	m_pMeshMngr = nullptr;
 	//it is not the job of the entity to release the model, 
 	//it is for the mesh manager to do so.
-	m_pModel = nullptr;
-	/*if (m_DimensionArray)
-	{
-		delete[] m_DimensionArray;
-		m_DimensionArray = nullptr;
-	}*/
+	m_pModel = nullptr; 
 	SafeDelete(m_pRigidBody);
 	m_IDMap.erase(m_sUniqueID);
 }
@@ -81,7 +74,7 @@ Simplex::MyEntity::MyEntity(MyEntity const& other)
 	m_bInMemory = other.m_bInMemory;
 	m_pModel = other.m_pModel;
 	//generate a new rigid body we do not share the same rigid body as we do the model
-	m_pRigidBody = new MyRigidBody(m_pModel->GetVertexList()); 
+	m_pRigidBody = new MyRigidBody(m_pModel->GetVertexList());
 	m_m4ToWorld = other.m_m4ToWorld;
 	m_pMeshMngr = other.m_pMeshMngr;
 	m_sUniqueID = other.m_sUniqueID;
@@ -89,8 +82,6 @@ Simplex::MyEntity::MyEntity(MyEntity const& other)
 	m_DimensionList = other.m_DimensionList;
 	m_nDimensionCount = other.m_nDimensionCount;
 	m_uMainDimension = other.m_uMainDimension;
-	//m_DimensionArray = other.m_DimensionArray;
-
 }
 MyEntity& Simplex::MyEntity::operator=(MyEntity const& other)
 {
@@ -149,20 +140,6 @@ void Simplex::MyEntity::AddDimension(uint a_uDimension)
 		return;//it is, so there is no need to add
 
 	//insert the entry
-	/*uint* pTemp;
-	pTemp = new uint[m_nDimensionCount + 1];
-	if(m_DimensionArray)
-	{
-		memcpy(pTemp, m_DimensionArray, sizeof(uint) * m_nDimensionCount);
-		delete[] m_DimensionArray;
-		m_DimensionArray = nullptr;
-	}
-	pTemp[m_nDimensionCount] = a_uDimension;
-	m_DimensionArray = pTemp;
-
-	++m_nDimensionCount;
-
-	SortDimensions();*/
 	m_DimensionList.push_back(a_uDimension);
 	++m_nDimensionCount;
 
@@ -171,16 +148,16 @@ void Simplex::MyEntity::AddDimension(uint a_uDimension)
 void Simplex::MyEntity::RemoveDimension(uint a_uDimension)
 {
 	//if there are no dimensions return
-	if (m_nDimensionCount == 0)
+	if (m_DimensionList.size() == 0)
 		return;
 
-	//we look one by one if its the one wanted
-	if (m_DimensionList[m_DimensionList.size() - 1] == a_uDimension)
+	//if the last dimension in the list is the one we pop from the list
+	if (m_DimensionList[m_DimensionList.size() -1] == a_uDimension)
 	{
 		m_DimensionList.pop_back();
 		--m_nDimensionCount;
 		//if there is still dimensions in the list make the main dimension the first
-		if (m_nDimensionCount > 0)
+		if(m_nDimensionCount > 0)
 			m_uMainDimension = m_DimensionList[0];
 		else //if there are not then make it the special dimension
 			m_uMainDimension = 0;
@@ -203,35 +180,9 @@ void Simplex::MyEntity::RemoveDimension(uint a_uDimension)
 			return;
 		}
 	}
-	/*for (uint i = 0; i < m_nDimensionCount; i++)
-	{
-		if (m_DimensionArray[i] == a_uDimension)
-		{
-			//if it is, then we swap it with the last one and then we pop
-			std::swap(m_DimensionArray[i], m_DimensionArray[m_nDimensionCount - 1]);
-			uint* pTemp;
-			pTemp = new uint[m_nDimensionCount - 1];
-			if (m_DimensionArray)
-			{
-				memcpy(pTemp, m_DimensionArray, sizeof(uint) * (m_nDimensionCount-1));
-				delete[] m_DimensionArray;
-				m_DimensionArray = nullptr;
-			}
-			m_DimensionArray = pTemp;
-			
-			--m_nDimensionCount;
-			SortDimensions();
-			return;
-		}
-	}*/
 }
 void Simplex::MyEntity::ClearDimensionSet(void)
 {
-	/*if (m_DimensionArray)
-	{
-		delete[] m_DimensionArray;
-		m_DimensionArray = nullptr;
-	}*/
 	m_DimensionList.clear();
 	m_nDimensionCount = 0;
 	m_uMainDimension = 0;
@@ -239,7 +190,7 @@ void Simplex::MyEntity::ClearDimensionSet(void)
 bool Simplex::MyEntity::IsInDimension(uint a_uDimension)
 {
 	//see if the entry is in the set
-	for (uint i = 0; i < m_nDimensionCount; i++)
+	for (uint i = 0; i < m_DimensionList.size(); i++)
 	{
 		if (m_DimensionList[i] == a_uDimension)
 			return true;
@@ -248,9 +199,8 @@ bool Simplex::MyEntity::IsInDimension(uint a_uDimension)
 }
 bool Simplex::MyEntity::SharesDimension(MyEntity* const a_pOther)
 {
-	
 	//special case: if there are no dimensions on either MyEntity
-	//then they live in the special global dimension
+	//if both entities have no dimension set then they live in the special global dimension
 	if (0 == m_nDimensionCount)
 	{
 		//if no spatial optimization all cases should fall here as every 
@@ -259,6 +209,17 @@ bool Simplex::MyEntity::SharesDimension(MyEntity* const a_pOther)
 			return true;
 	}
 
+	//special case if there are only one dimension on each MyEntity
+	if (1 == m_nDimensionCount)
+	{
+		if (1 == a_pOther->m_nDimensionCount)
+		{
+			//as there is only one dimension we check the main dimension only
+			return m_uMainDimension == a_pOther->m_uMainDimension;
+		}
+	}
+	
+	//we tried to avoid this case as indexing is more expensive
 	//for each dimension on both Entities we check if there is a common dimension
 	for (uint i = 0; i < m_nDimensionCount; ++i)
 	{
@@ -288,8 +249,4 @@ bool Simplex::MyEntity::IsColliding(MyEntity* const other)
 void Simplex::MyEntity::ClearCollisionList(void)
 {
 	m_pRigidBody->ClearCollidingList();
-}
-void Simplex::MyEntity::SortDimensions(void)
-{
-	//std::sort(m_DimensionArray, m_DimensionArray + m_nDimensionCount);
 }

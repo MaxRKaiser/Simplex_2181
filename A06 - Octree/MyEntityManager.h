@@ -17,7 +17,9 @@ class MyEntityManager
 	uint m_uEntityCount = 0; //number of elements in the list
 	PEntity* m_mEntityArray = nullptr; //array of MyEntity pointers
 	static MyEntityManager* m_pInstance; // Singleton pointer
+	std::vector<MyEntity*> m_EntityList; //entities list
 public:
+	std::vector<MyEntity*> GetEntityList(void);
 	/*
 	Usage: Gets the singleton pointer
 	Arguments: ---

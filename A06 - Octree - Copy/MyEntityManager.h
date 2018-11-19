@@ -22,6 +22,12 @@ class MyEntityManager
 public:
 	std::vector<MyEntity*> GetEntityList(void);
 	/*
+	USAGE: will remove all dimensions from all entities
+	ARGUMENTS: ---
+	OUTPUT: ---
+	*/
+	void ClearDimensionSetAll(void);
+	/*
 	Usage: Gets the singleton pointer
 	Arguments: ---
 	Output: singleton pointer
